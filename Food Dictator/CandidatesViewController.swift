@@ -13,13 +13,13 @@ class CandidatesViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
     @IBOutlet var actionButton: UIButton!
     @IBOutlet var addUserButton: UIButton!
-    private var didPromptForMore:Bool = false;
+    fileprivate var didPromptForMore:Bool = false;
     
     weak var candidateManager: CandidateManager?
     
     required init?(coder aDecoder: NSCoder) {
         
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         candidateManager = appDelegate.candidateManager
         
         super.init(coder: aDecoder)
@@ -29,7 +29,7 @@ class CandidatesViewController: UIViewController {
         super.viewDidLoad()
 
         // table setup
-        tableView.registerNib(UINib.init(nibName: "CandidateTableViewCell", bundle: NSBundle.mainBundle()), forCellReuseIdentifier: Constants.fdCellIdentifier)
+        tableView.register(UINib.init(nibName: "CandidateTableViewCell", bundle: Bundle.main), forCellReuseIdentifier: Constants.fdCellIdentifier)
         tableView.allowsMultipleSelectionDuringEditing = false
         
         actionButton.backgroundColor = Constants.fdRedColor
@@ -37,12 +37,12 @@ class CandidatesViewController: UIViewController {
         actionButton.layer.borderWidth = 2.0
         actionButton.layer.cornerRadius = 6.0
         actionButton.clipsToBounds = true
-        actionButton.setTitleColor(UIColor.grayColor(), forState: .Disabled);
+        actionButton.setTitleColor(UIColor.gray, for: .disabled);
         
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .Add, target: self, action: #selector(CandidatesViewController.handleAddNewCandidate))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .add, target: self, action: #selector(CandidatesViewController.handleAddNewCandidate))
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
 
         super.viewWillAppear(animated)
         
@@ -51,7 +51,7 @@ class CandidatesViewController: UIViewController {
         refreshActionButton()
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         
         super.viewDidAppear(animated)
 
@@ -59,12 +59,12 @@ class CandidatesViewController: UIViewController {
             
             let alertController = UIAlertController(title: "Choose Candidates",
                                                     message: "Comrade! Choose candidates for the Food Dictator \"Election\"!",
-                                                    preferredStyle: UIAlertControllerStyle.Alert)
+                                                    preferredStyle: UIAlertController.Style.alert)
             alertController.addAction(UIAlertAction(title: "OK",
-                style: UIAlertActionStyle.Default,
+                style: UIAlertAction.Style.default,
                 handler: {(alert: UIAlertAction!) in self.handleAddNewCandidate()}))
 
-            self.presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         }
         else if (candidateManager!.candidates().count == 1 && didPromptForMore == false) {
             
@@ -72,28 +72,28 @@ class CandidatesViewController: UIViewController {
             
             let alertController = UIAlertController(title: "Choose Another?",
                                                     message: "Comrade! More candidates will make for better \"Election\", no?",
-                                                    preferredStyle: UIAlertControllerStyle.Alert)
+                                                    preferredStyle: UIAlertController.Style.alert)
             alertController.addAction(UIAlertAction(title: "Da!",
-                style: UIAlertActionStyle.Default,
+                style: UIAlertAction.Style.default,
                 handler: {(alert: UIAlertAction!) in self.handleAddNewCandidate()}))
 
             alertController.addAction(UIAlertAction(title: "Nyet",
-                style: UIAlertActionStyle.Cancel,
+                style: UIAlertAction.Style.cancel,
                 handler: nil))
             
-            self.presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         }
     }
     
     
     // MARK: -
     
-    private func refreshActionButton() {
-        actionButton.enabled = candidateManager!.hasAvailableCandidates()
+    fileprivate func refreshActionButton() {
+        actionButton.isEnabled = candidateManager!.hasAvailableCandidates()
     }
     
-    @objc private func handleAddNewCandidate() {
-        let chooser = self.storyboard?.instantiateViewControllerWithIdentifier("CandidateChooserViewController") as! CandidateChooserViewController
+    @objc fileprivate func handleAddNewCandidate() {
+        let chooser = self.storyboard?.instantiateViewController(withIdentifier: "CandidateChooserViewController") as! CandidateChooserViewController
 
         self.navigationController?.pushViewController(chooser, animated: true)
     }
@@ -104,19 +104,19 @@ extension CandidatesViewController: UITableViewDelegate, UITableViewDataSource {
     
     // MARK: - Data
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return Constants.fdCellHeight
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         return candidateManager!.candidates().count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier(Constants.fdCellIdentifier) as! CandidateTableViewCell
-        let c = candidateManager!.candidates()[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.fdCellIdentifier) as! CandidateTableViewCell
+        let c = candidateManager!.candidates()[(indexPath as NSIndexPath).row]
         cell.nameLabel.text = c.name
         cell.subtitleLabel.text = c.isElectable ? c.title : "Maybe next time..."
         cell.isElectable = c.isElectable
@@ -127,34 +127,34 @@ extension CandidatesViewController: UITableViewDelegate, UITableViewDataSource {
     
     
     // MARK: - Selection
-    func tableView(tableView: UITableView, shouldHighlightRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let c = candidateManager!.candidates()[indexPath.row]
+        let c = candidateManager!.candidates()[(indexPath as NSIndexPath).row]
         
         candidateManager!.toggleCandidateActivation(c);
         
         refreshActionButton()
 
-        tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+        tableView.reloadRows(at: [indexPath], with: .fade)
     }
 
     
     // MARK: - Editing
     
-    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if (editingStyle == .Delete) {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if (editingStyle == .delete) {
             // update the model
-            candidateManager!.removeCandidateAtIndex(indexPath.row)
+            candidateManager!.removeCandidateAtIndex((indexPath as NSIndexPath).row)
             // update the table
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
         }
     }
 }

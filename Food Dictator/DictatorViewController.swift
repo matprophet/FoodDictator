@@ -21,24 +21,24 @@ class DictatorViewController: UIViewController {
     @IBOutlet var findRestaurantsButton:UIButton!
     
     weak var candidateManager: CandidateManager?
-    private var locationManager: CLLocationManager!
-    private var crowdSound: SystemSoundID = 0
-    private var boosSound: SystemSoundID = 0
-    private var hasPendingMapsLink: Bool
+    fileprivate var locationManager: CLLocationManager!
+    fileprivate var crowdSound: SystemSoundID = 0
+    fileprivate var boosSound: SystemSoundID = 0
+    fileprivate var hasPendingMapsLink: Bool
     
     required init?(coder aDecoder: NSCoder) {
         
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         candidateManager = appDelegate.candidateManager
         
         hasPendingMapsLink = false
         
-        if let crowdURL = NSBundle.mainBundle().URLForResource("crowd", withExtension: "wav") {
-            AudioServicesCreateSystemSoundID(crowdURL, &crowdSound)
+        if let crowdURL = Bundle.main.url(forResource: "crowd", withExtension: "wav") {
+            AudioServicesCreateSystemSoundID(crowdURL as CFURL, &crowdSound)
         }
         
-        if let boosURL = NSBundle.mainBundle().URLForResource("booing", withExtension: "wav") {
-            AudioServicesCreateSystemSoundID(boosURL, &boosSound)
+        if let boosURL = Bundle.main.url(forResource: "booing", withExtension: "wav") {
+            AudioServicesCreateSystemSoundID(boosURL as CFURL, &boosSound)
         }
         
         super.init(coder: aDecoder)
@@ -61,15 +61,15 @@ class DictatorViewController: UIViewController {
         findRestaurantsButton.alpha = 0
         quoteText.alpha = 0
 
-        profileImage.backgroundColor = UIColor.whiteColor()
+        profileImage.backgroundColor = UIColor.white
         profileImage.clipsToBounds = true
         profileImage.layer.masksToBounds = true
         profileImage.layer.borderWidth = 1.0
-        profileImage.layer.borderColor = UIColor.init(white: 0.80, alpha: 1.0).CGColor
+        profileImage.layer.borderColor = UIColor.init(white: 0.80, alpha: 1.0).cgColor
         profileImage.layer.cornerRadius = profileImage.frame.size.height / 2.0
 
         findRestaurantsButton.layer.borderWidth = 1.0
-        findRestaurantsButton.layer.borderColor = UIColor.init(white: 0.50, alpha: 1.0).CGColor
+        findRestaurantsButton.layer.borderColor = UIColor.init(white: 0.50, alpha: 1.0).cgColor
         findRestaurantsButton.layer.cornerRadius = 6.0
         
         if let c = candidateManager?.randomCandidate() {
@@ -83,7 +83,7 @@ class DictatorViewController: UIViewController {
         }
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
      
         AudioServicesPlaySystemSound(crowdSound);
@@ -91,17 +91,17 @@ class DictatorViewController: UIViewController {
         presentCandidate()
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         AudioServicesDisposeSystemSoundID(self.crowdSound)
         AudioServicesDisposeSystemSoundID(self.boosSound)
     }
     
-    @IBAction func handleFindRestaurantsButton(sender: UIButton) {
+    @IBAction func handleFindRestaurantsButton(_ sender: UIButton) {
         
         // async
-        if CLLocationManager.authorizationStatus() == .NotDetermined {
+        if CLLocationManager.authorizationStatus() == .notDetermined {
 
             hasPendingMapsLink = true
 
@@ -117,33 +117,33 @@ class DictatorViewController: UIViewController {
         // clear the flag
         hasPendingMapsLink = false
         
-        let d = NSDate.init()
+        let d = Date.init()
         var foodType: String
         switch d.currentTimeslot() {
-        case .Breakfast:
+        case .breakfast:
             foodType = "breakfast"
             break
             
-        case .Lunch:
+        case .lunch:
             foodType = "lunch"
             break;
             
-        case .Snacks:
+        case .snacks:
             foodType = "cafe"
             break
             
-        case .Dinner:
+        case .dinner:
             foodType = "dinner"
             break
             
-        case .None:
+        case .none:
             foodType = "food"
             break
         }
         
         var urlStr: String
-        if (CLLocationManager.authorizationStatus() == .AuthorizedAlways ||
-            CLLocationManager.authorizationStatus() == .AuthorizedWhenInUse) {
+        if (CLLocationManager.authorizationStatus() == .authorizedAlways ||
+            CLLocationManager.authorizationStatus() == .authorizedWhenInUse) {
             
             let location = locationManager.location
             let coordinate = location!.coordinate
@@ -155,16 +155,16 @@ class DictatorViewController: UIViewController {
         }
 
         
-        let url = NSURL.init(string: urlStr)!
-        UIApplication.sharedApplication().openURL(url)
+        let url = URL.init(string: urlStr)!
+        UIApplication.shared.openURL(url)
     }
     
     
     func presentCandidate() {
         
-        UIView.animateWithDuration(0.5,
+        UIView.animate(withDuration: 0.5,
                                    delay: 1.0,
-                                   options: .CurveEaseIn,
+                                   options: .curveEaseIn,
                                    animations: {
                                     self.title1.alpha = 1.0
                                     self.title2.alpha = 1.0
@@ -177,9 +177,9 @@ class DictatorViewController: UIViewController {
     }
     
     func animateProfile() {
-        UIView.animateWithDuration(0.25,
+        UIView.animate(withDuration: 0.25,
                                    delay: 2.0,
-                                   options: .CurveEaseOut,
+                                   options: .curveEaseOut,
                                    animations: {
                                     self.profileImage.alpha = 1.0
                                     self.name.alpha = 1.0
@@ -195,9 +195,9 @@ class DictatorViewController: UIViewController {
     }
     
     func animateFindButton() {
-        UIView.animateWithDuration(0.75,
+        UIView.animate(withDuration: 0.75,
                                    delay: 1.0,
-                                   options: .CurveEaseOut,
+                                   options: .curveEaseOut,
                                    animations: {
                                     self.findRestaurantsButton.alpha = 1.0
                                     self.quoteText.alpha = 1.0
@@ -209,7 +209,7 @@ class DictatorViewController: UIViewController {
 
 extension DictatorViewController : CLLocationManagerDelegate {
     
-    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         
         if (hasPendingMapsLink) {
             openMapsLink()

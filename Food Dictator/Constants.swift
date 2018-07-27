@@ -11,8 +11,8 @@ import UIKit
 
 struct Constants {
     static let fdRedColor = UIColor.init(red: 171.0/255.0, green: 0, blue: 0, alpha: 1)
-    static let fdLightRedColor = UIColor.init(red: 200.0/255.0, green: 0, blue: 0, alpha: 1).CGColor
-    static let fdFontColor = UIColor.whiteColor()
+    static let fdLightRedColor = UIColor.init(red: 200.0/255.0, green: 0, blue: 0, alpha: 1).cgColor
+    static let fdFontColor = UIColor.white
     static let fdLargeFont = UIFont.init(name: "Dictator", size: 20)!
     static let fdMiddleFont = UIFont.init(name: "Dictator", size: 14)!
     static let fdCellHeight: CGFloat = 64.0

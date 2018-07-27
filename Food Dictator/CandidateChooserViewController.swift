@@ -14,19 +14,19 @@ class CandidateChooserViewController: UIViewController {
 
     @IBOutlet var tableView:UITableView!
 
-    private var hasAddressBookPermissions: Bool = true
-    private weak var candidateManager: CandidateManager?
-    private var allContacts:[Candidate] = []
-    private var filteredContacts:[Candidate] = []
+    fileprivate var hasAddressBookPermissions: Bool = true
+    fileprivate weak var candidateManager: CandidateManager?
+    fileprivate var allContacts:[Candidate] = []
+    fileprivate var filteredContacts:[Candidate] = []
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         candidateManager = appDelegate.candidateManager
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
     
     required init?(coder aDecoder: NSCoder) {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         candidateManager = appDelegate.candidateManager
         super.init(coder: aDecoder)
     }
@@ -36,10 +36,10 @@ class CandidateChooserViewController: UIViewController {
 
         self.title = "Comrades"
         
-        tableView.registerNib(UINib.init(nibName: "CandidateTableViewCell", bundle: NSBundle.mainBundle()), forCellReuseIdentifier: Constants.fdCellIdentifier)
+        tableView.register(UINib.init(nibName: "CandidateTableViewCell", bundle: Bundle.main), forCellReuseIdentifier: Constants.fdCellIdentifier)
     }
  
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         refreshContacts()
@@ -53,10 +53,10 @@ class CandidateChooserViewController: UIViewController {
         func displayNoAccessAlert() {
             let alertController = UIAlertController(title: "Nyet! Access Denied!",
                                                     message: "Please, comrade, enable AddressBook access in the Settings.",
-                                                    preferredStyle: UIAlertControllerStyle.Alert)
-            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default,handler: nil))
+                                                    preferredStyle: UIAlertController.Style.alert)
+            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default,handler: nil))
             
-            self.presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         }
         
         func loadUsers() {
@@ -64,14 +64,14 @@ class CandidateChooserViewController: UIViewController {
             let contactStore = CNContactStore()
 
             let keysToFetch = [
-                CNContactFormatter.descriptorForRequiredKeysForStyle(.FullName),
+                CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
                 CNContactImageDataAvailableKey,
-                CNContactThumbnailImageDataKey]
+                CNContactThumbnailImageDataKey] as [Any]
             
             // Get all the containers
             var allContainers: [CNContainer] = []
             do {
-                allContainers = try contactStore.containersMatchingPredicate(nil)
+                allContainers = try contactStore.containers(matching: nil)
             } catch {
                 print("Error fetching containers")
             }
@@ -80,10 +80,10 @@ class CandidateChooserViewController: UIViewController {
             
             // Iterate all containers and append their contacts to our results array
             for container in allContainers {
-                let fetchPredicate = CNContact.predicateForContactsInContainerWithIdentifier(container.identifier)
+                let fetchPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
                 do {
-                    let containerResults = try contactStore.unifiedContactsMatchingPredicate(fetchPredicate, keysToFetch: keysToFetch)
-                    results.appendContentsOf(containerResults)
+                    let containerResults = try contactStore.unifiedContacts(matching: fetchPredicate, keysToFetch: keysToFetch as! [CNKeyDescriptor])
+                    results.append(contentsOf: containerResults)
                 } catch {
                     print("Error fetching results for container")
                 }
@@ -94,7 +94,7 @@ class CandidateChooserViewController: UIViewController {
             allContacts = results.map { (cn) -> Candidate in
                 
                 var name = ""
-                if let fullname = CNContactFormatter.stringFromContact(cn, style: .FullName) {
+                if let fullname = CNContactFormatter.string(from: cn, style: .fullName) {
                     name = fullname
                 }
                 
@@ -113,11 +113,11 @@ class CandidateChooserViewController: UIViewController {
         }
         
         
-        let access = CNContactStore.authorizationStatusForEntityType(.Contacts)
+        let access = CNContactStore.authorizationStatus(for: .contacts)
         
-        if (access == .NotDetermined) {
-            CNContactStore().requestAccessForEntityType(.Contacts, completionHandler: { (didSucceed: Bool, error: NSError?) in
-                dispatch_async(dispatch_get_main_queue(), {
+        if (access == .notDetermined) {
+            CNContactStore().requestAccess(for: .contacts, completionHandler: { (didSucceed, error) in
+                DispatchQueue.main.async(execute: {
                     if (didSucceed == false) {
                         displayNoAccessAlert()
                     }
@@ -127,7 +127,7 @@ class CandidateChooserViewController: UIViewController {
                 })
             })
         }
-        else if( access == .Denied) {
+        else if( access == .denied) {
             // put up a dialog?
             displayNoAccessAlert()
         }
@@ -142,7 +142,7 @@ class CandidateChooserViewController: UIViewController {
 
 extension CandidateChooserViewController: UISearchBarDelegate {
     
-    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         
         if (searchText.isEmpty) {
             filteredContacts = allContacts
@@ -150,7 +150,7 @@ extension CandidateChooserViewController: UISearchBarDelegate {
         else
         {
             filteredContacts = allContacts.filter({ (c) -> Bool in
-                if c.name.rangeOfString(searchText, options: .CaseInsensitiveSearch) != nil {
+                if c.name.range(of: searchText, options: .caseInsensitive) != nil {
                     return true
                 }
                 else {
@@ -168,19 +168,19 @@ extension CandidateChooserViewController: UISearchBarDelegate {
 
 extension CandidateChooserViewController: UITableViewDelegate, UITableViewDataSource {
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return Constants.fdCellHeight
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         return filteredContacts.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier(Constants.fdCellIdentifier) as! CandidateTableViewCell
-        let c = filteredContacts[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.fdCellIdentifier) as! CandidateTableViewCell
+        let c = filteredContacts[(indexPath as NSIndexPath).row]
         
         cell.nameLabel.text = c.name
         cell.subtitleLabel.text = c.title
@@ -190,18 +190,18 @@ extension CandidateChooserViewController: UITableViewDelegate, UITableViewDataSo
         return cell
     }
     
-    func tableView(tableView: UITableView, shouldHighlightRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
-        candidateManager!.addUser(filteredContacts[indexPath.row]);
+        candidateManager!.addUser(filteredContacts[(indexPath as NSIndexPath).row]);
         
-        self.navigationController?.popViewControllerAnimated(true)
+        self.navigationController?.popViewController(animated: true)
     }
     
-    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return false
     }
 }

@@ -10,7 +10,7 @@ import Foundation
 
 class CandidateManager: NSObject {
     
-    private var _candidates: [Candidate] = []
+    fileprivate var _candidates: [Candidate] = []
 
     override init() {
         
@@ -24,7 +24,7 @@ class CandidateManager: NSObject {
     // MARK: - Persistence
     
     func cachePath() -> String {
-        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         let documentsDirectory = paths[0];
         let candidatesPlist = documentsDirectory + "/" + Constants.fdPersistanceFile
         return candidatesPlist
@@ -32,13 +32,13 @@ class CandidateManager: NSObject {
     
     func save() {
         let wrapperArray = _candidates.map { $0.dataDictionary }
-        let data = NSKeyedArchiver.archivedDataWithRootObject(wrapperArray)
-        data.writeToFile(cachePath(), atomically: false)
+        let data = NSKeyedArchiver.archivedData(withRootObject: wrapperArray)
+        try? data.write(to: URL(fileURLWithPath: cachePath()), options: [])
     }
     
     func restore() {
-        if let data = NSData.init(contentsOfFile: cachePath()) {
-            let unwrapperArray = NSKeyedUnarchiver.unarchiveObjectWithData(data) as! [[String: AnyObject]]
+        if let data = try? Data.init(contentsOf: URL(fileURLWithPath: cachePath())) {
+            let unwrapperArray = NSKeyedUnarchiver.unarchiveObject(with: data) as! [[String: AnyObject]]
             _candidates = unwrapperArray.map { Candidate.init(dataDictionary: $0) }
         }
         
@@ -46,7 +46,7 @@ class CandidateManager: NSObject {
     }
     
     func sortCandidates() {
-        _candidates.sortInPlace { (one, two) -> Bool in
+        _candidates.sort { (one, two) -> Bool in
             return one.name < two.name
         }
     }
@@ -58,9 +58,9 @@ class CandidateManager: NSObject {
         return _candidates
     }
     
-    func toggleCandidateActivation(candidate: Candidate) {
+    func toggleCandidateActivation(_ candidate: Candidate) {
         
-        if let idx = _candidates.indexOf(candidate) {
+        if let idx = _candidates.index(of: candidate) {
             // modify in place to be sure we change the actual value and not a copy of the user struct
             if (_candidates[idx].isElectable) {
                 _candidates[idx].isElectable = false
@@ -73,9 +73,9 @@ class CandidateManager: NSObject {
         }
     }
     
-    func addUser(candidate: Candidate) {
+    func addUser(_ candidate: Candidate) {
         
-        if let idx = _candidates.indexOf(candidate) {
+        if let idx = _candidates.index(of: candidate) {
             fatalError("candidate exists at index \(idx)")
         }
         
@@ -85,9 +85,9 @@ class CandidateManager: NSObject {
         sortCandidates()
     }
     
-    func removeCandidate(candidate: Candidate) {
+    func removeCandidate(_ candidate: Candidate) {
 
-        if let idx = _candidates.indexOf(candidate) {
+        if let idx = _candidates.index(of: candidate) {
             removeCandidateAtIndex(idx)
         }
         else {
@@ -95,8 +95,8 @@ class CandidateManager: NSObject {
         }
     }
     
-    func removeCandidateAtIndex(index: Int) {
-        _candidates.removeAtIndex(index)
+    func removeCandidateAtIndex(_ index: Int) {
+        _candidates.remove(at: index)
 
         save()
     }

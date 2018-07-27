@@ -19,20 +19,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         super.init()
     }
     
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         UINavigationBar.appearance().barTintColor =  Constants.fdRedColor
-        UINavigationBar.appearance().tintColor = UIColor.whiteColor()
+        UINavigationBar.appearance().tintColor = UIColor.white
         
+        //[: UIFont(name: "HelveticaNeue-Light", size: 19)!]
+
         UINavigationBar.appearance().titleTextAttributes = [
-            NSFontAttributeName:  Constants.fdLargeFont,
-            NSForegroundColorAttributeName: Constants.fdFontColor];
+            NSAttributedString.Key.font:  Constants.fdLargeFont,
+            NSAttributedString.Key.foregroundColor: Constants.fdFontColor];
 
         
-        UIBarButtonItem.appearance().setTitleTextAttributes([NSForegroundColorAttributeName: Constants.fdFontColor,
-            NSFontAttributeName: Constants.fdMiddleFont], forState: UIControlState.Normal)
+        UIBarButtonItem.appearance().setTitleTextAttributes(convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): Constants.fdFontColor,
+            convertFromNSAttributedStringKey(NSAttributedString.Key.font): Constants.fdMiddleFont]), for: UIControl.State())
         
         return true
     }
 }
 
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}

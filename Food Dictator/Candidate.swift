@@ -33,10 +33,10 @@ extension Candidate: ArchivableStruct {
     var dataDictionary: [String: AnyObject] {
         get {
             var dict:[String: AnyObject] = [
-                "name": self.name,
-                "title": self.title,
-                "contactsIdentifier": self.contactsIdentifier,
-                "isElectable": self.isElectable
+                "name": self.name as AnyObject,
+                "title": self.title as AnyObject,
+                "contactsIdentifier": self.contactsIdentifier as AnyObject,
+                "isElectable": self.isElectable as AnyObject
             ]
             
             if self.profileImage != nil {

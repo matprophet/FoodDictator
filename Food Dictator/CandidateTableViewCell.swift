@@ -24,12 +24,12 @@ class CandidateTableViewCell: UITableViewCell {
             _isElectable = newValue
             profileImageView.alpha = _isElectable ? 1.0 : 0.5
             
-            let textColor = _isElectable ? UIColor.blackColor() : UIColor.lightGrayColor()
+            let textColor = _isElectable ? UIColor.black : UIColor.lightGray
             nameLabel.textColor = textColor
             subtitleLabel.textColor = textColor
             statusLabel.textColor = textColor
             
-            statusLabel.hidden = _isElectable
+            statusLabel.isHidden = _isElectable
         }
     }
     
@@ -37,7 +37,7 @@ class CandidateTableViewCell: UITableViewCell {
         profileImageView.clipsToBounds = true
         profileImageView.layer.masksToBounds = true
         profileImageView.layer.borderWidth = 1.0
-        profileImageView.layer.borderColor = UIColor.init(white: 0.80, alpha: 1.0).CGColor
+        profileImageView.layer.borderColor = UIColor.init(white: 0.80, alpha: 1.0).cgColor
     }
     
     override func layoutSubviews() {
@@ -52,7 +52,7 @@ class CandidateTableViewCell: UITableViewCell {
         nameLabel.text = ""
         subtitleLabel.text = ""
         profileImageView.image = nil
-        statusLabel.hidden = true
+        statusLabel.isHidden = true
         isElectable = true
     }
 }
